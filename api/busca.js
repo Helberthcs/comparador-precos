@@ -16,7 +16,18 @@ export default async function handler(req, res) {
       body: JSON.stringify(req.body),
     });
 
-    const data = await response.json();
+    // Get raw text first
+    const text = await response.text();
+    
+    // Try to parse as JSON, otherwise return as text
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch(e) {
+      // It's plain text - wrap it
+      data = { finalResponse: text.replace(/^=+/, '').trim() };
+    }
+
     return res.status(200).json(data);
   } catch (err) {
     return res.status(500).json({ error: err.message });
